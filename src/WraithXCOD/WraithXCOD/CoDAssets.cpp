@@ -24,6 +24,7 @@
 
 // We need settings
 #include "SettingsManager.h"
+#include "json.hpp"
 
 // We need the CoDTranslators
 #include "CoDXAnimTranslator.h"
@@ -426,6 +427,8 @@ const std::vector<CoDGameProcess> CoDAssets::GameProcessInfo =
     { "t6zm.exe", SupportedGames::BlackOps2, SupportedGameFlags::ZM },
     { "t6mp.exe", SupportedGames::BlackOps2, SupportedGameFlags::MP },
     { "t6sp.exe", SupportedGames::BlackOps2, SupportedGameFlags::SP },
+    // Plutonium maps its own t6zm/t6mp build into the bootstrapper at 0x400000, the pattern scan fallback finds its pools
+    { "plutonium-bootstrapper-win32.exe", SupportedGames::BlackOps2, SupportedGameFlags::ZM },
     // Black Ops 3
     { "blackops3.exe", SupportedGames::BlackOps3, SupportedGameFlags::SP },
     // Black Ops 4
@@ -1114,8 +1117,21 @@ bool CoDAssets::LocateGameInfo()
         GameStringHandler = GameBlackOps2::LoadStringEntry;
         // Allocate a new IPAK Mega Cache
         GamePackageCache = std::make_unique<IPAKCache>();
-        // Set the IPAK path
-        GamePackageCache->LoadPackageCacheAsync(FileSystems::CombinePath(FileSystems::GetDirectoryName(GameInstance->GetProcessPath()), "zone\\all"));
+        {
+            auto ProcessPath = GameInstance->GetProcessPath();
+            auto GamePath = FileSystems::GetDirectoryName(ProcessPath);
+            // Plutonium runs from its own bin folder, the IPAKs are in the BO2 install set in its launcher config
+            char LocalAppData[MAX_PATH];
+            auto LocalAppDataLength = GetEnvironmentVariableA("LOCALAPPDATA", LocalAppData, MAX_PATH);
+            if (_stricmp(FileSystems::GetFileName(ProcessPath).c_str(), "plutonium-bootstrapper-win32.exe") == 0 && LocalAppDataLength > 0 && LocalAppDataLength < MAX_PATH)
+            {
+                auto Config = nlohmann::json::parse(std::ifstream(FileSystems::CombinePath(LocalAppData, "Plutonium\\config.json")), nullptr, false);
+                if (Config.is_object() && Config["t6Path"].is_string())
+                    GamePath = Config["t6Path"].get<std::string>();
+            }
+            // Set the IPAK path
+            GamePackageCache->LoadPackageCacheAsync(FileSystems::CombinePath(GamePath, "zone\\all"));
+        }
         break;
     case SupportedGames::BlackOps3:
         // Load game offset info
