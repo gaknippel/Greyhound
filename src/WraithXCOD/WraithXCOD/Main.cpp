@@ -16,6 +16,7 @@
 #include "WraithUpdate.h"
 
 #include "MainWindow.h"
+#include "HeadlessServer.h"
 
 // The resource file
 #include "resource.h"
@@ -221,19 +222,25 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
         char** argv = __argv;
 #endif
 
-        // Handle CLI 
+        // Handle CLI
+        bool ServerMode = false;
         for (int i = 0; i < argc; i++)
         {
             if (strcmp(argv[i], "verifiedhashes") == 0)
             {
                 CoDAssets::VerifiedHashes = true;
             }
+            else if (strcmp(argv[i], "--server") == 0)
+            {
+                ServerMode = true;
+            }
         }
 
         // Clean up files
         CleanupFilesystem();
-        // Check for updates
-        WraithUpdate::CheckForUpdates("Scobalula", "Greyhound", "Greyhound", "greyhound.exe");
+        // Check for updates (it can show a dialog, nobody is there to answer it in server mode)
+        if (!ServerMode)
+            WraithUpdate::CheckForUpdates("Scobalula", "Greyhound", "Greyhound", "greyhound.exe");
 
         // Initialize the API (This must be done BEFORE running a WraithApp)
         if (!WraithX::InitializeAPI(true))
@@ -244,8 +251,11 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
             return -1;
         }
 
-        // Show the main window instance
-        WraithAppInstance.RunApplication(MainWindow());
+        // Show the main window instance, or serve the Tauri UI
+        if (ServerMode)
+            HeadlessServer::Run();
+        else
+            WraithAppInstance.RunApplication(MainWindow());
 
         // Tell the asset cache to clean up (Prevents crash on async cache loading)
         CoDAssets::CleanUpGame();

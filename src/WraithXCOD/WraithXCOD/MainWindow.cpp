@@ -404,7 +404,7 @@ void MainWindow::OnAssetListDoubleClick(NMHDR* pNMHDR, LRESULT* pResult)
                 // Get the unique name for this asset
                 auto& AssetName = LoadedAssets[(uint32_t)hItem]->AssetName;
                 // Show popup
-                this->PopupDialog->ShowPopup(Strings::Format("%s was exported", AssetName.c_str()).c_str(), FileSystems::CombinePath(FileSystems::GetApplicationPath(), "exported_files").c_str(), 6000);
+                this->PopupDialog->ShowPopup(Strings::Format("%s was exported", AssetName.c_str()).c_str(), CoDAssets::GetExportRoot().c_str(), 6000);
             });
             // Detatch
             ExportAsync.detach();
@@ -730,7 +730,7 @@ void MainWindow::OnExportAll()
             // Update status
             this->ProgressDialog->UpdateStatus("Export complete");
             // Show popup
-            this->PopupDialog->ShowPopup("Bulk export has finished", FileSystems::CombinePath(FileSystems::GetApplicationPath(), "exported_files").c_str(), 6000);
+            this->PopupDialog->ShowPopup("Bulk export has finished", CoDAssets::GetExportRoot().c_str(), 6000);
         }
         else
         {
@@ -788,7 +788,7 @@ void MainWindow::OnExportSelected()
                 // Update status
                 this->ProgressDialog->UpdateStatus("Export complete");
                 // Show popup
-                this->PopupDialog->ShowPopup("Bulk export has finished", FileSystems::CombinePath(FileSystems::GetApplicationPath(), "exported_files").c_str(), 6000);
+                this->PopupDialog->ShowPopup("Bulk export has finished", CoDAssets::GetExportRoot().c_str(), 6000);
             }
             else
             {

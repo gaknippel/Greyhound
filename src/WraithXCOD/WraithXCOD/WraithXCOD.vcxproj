@@ -153,6 +153,7 @@
     <ClCompile Include="IPAKSupport.cpp" />
     <ClCompile Include="IWDCache.cpp" />
     <ClCompile Include="IWDSupport.cpp" />
+    <ClCompile Include="HeadlessServer.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="MainWindow.cpp" />
     <ClCompile Include="ModelSettings.cpp" />
@@ -179,6 +180,7 @@
     <ClInclude Include="AnimSettings.h" />
     <ClInclude Include="CascFileSystem.h" />
     <ClInclude Include="CoDAssets.h" />
+    <ClInclude Include="HeadlessServer.h" />
     <ClInclude Include="CoDAssetType.h" />
     <ClInclude Include="CoDCDNCache.h" />
     <ClInclude Include="CoDCDNDownloader.h" />

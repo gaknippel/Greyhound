@@ -218,6 +218,8 @@ public:
 
     // The latest export path
     static std::string LatestExportPath;
+    // The folder exports go into, "export_path" from settings or exported_files next to the exe
+    static std::string GetExportRoot();
 
     // Exports the game asset
     static ExportGameResult ExportAsset(const CoDAsset_t* Asset);

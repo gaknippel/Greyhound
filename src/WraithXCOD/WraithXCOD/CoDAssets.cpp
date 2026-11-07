@@ -1302,10 +1302,16 @@ bool CoDAssets::LocateGameInfo()
     return false;
 }
 
+std::string CoDAssets::GetExportRoot()
+{
+    auto ExportPath = SettingsManager::GetSetting("export_path", "");
+    return Strings::IsNullOrWhiteSpace(ExportPath) ? FileSystems::CombinePath(FileSystems::GetApplicationPath(), "exported_files") : ExportPath;
+}
+
 std::string CoDAssets::BuildExportPath(const CoDAsset_t* Asset)
 {
     // Build the export path
-    auto ApplicationPath = FileSystems::CombinePath(FileSystems::GetApplicationPath(), "exported_files");
+    auto ApplicationPath = GetExportRoot();
 
     // Append the game directory
     switch (GameID)
@@ -2352,10 +2358,10 @@ void CoDAssets::ExportAllAssets(void* Caller)
     // Prepare to export all available assets
     auto AssetsToExport = std::make_unique<std::vector<CoDAsset_t*>>();
 
-    // Grab the parent window and check mode
+    // Grab the parent window and check mode (no window in headless mode, indices are into the full list)
     auto MainView = (MainWindow*)Caller;
     // Resolve the asset list
-    auto& LoadedAssets = (MainView->SearchMode) ? MainView->SearchResults : CoDAssets::GameAssets->LoadedAssets;
+    auto& LoadedAssets = (MainView != nullptr && MainView->SearchMode) ? MainView->SearchResults : CoDAssets::GameAssets->LoadedAssets;
 
     // An index for the element position
     uint32_t AssetPosition = 0;
@@ -2388,10 +2394,10 @@ void CoDAssets::ExportSelection(const std::vector<uint32_t>& Indicies, void* Cal
     // Prepare to export all available assets
     auto AssetsToExport = std::make_unique<std::vector<CoDAsset_t*>>();
 
-    // Grab the parent window and check mode
+    // Grab the parent window and check mode (no window in headless mode, indices are into the full list)
     auto MainView = (MainWindow*)Caller;
     // Resolve the asset list
-    auto& LoadedAssets = (MainView->SearchMode) ? MainView->SearchResults : CoDAssets::GameAssets->LoadedAssets;
+    auto& LoadedAssets = (MainView != nullptr && MainView->SearchMode) ? MainView->SearchResults : CoDAssets::GameAssets->LoadedAssets;
 
     // Load up the assets, just passing the array
     for (auto& AssetIndex : Indicies)
